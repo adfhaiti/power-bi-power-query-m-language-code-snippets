@@ -1,12 +1,13 @@
 let
     // ===== CONFIGURATION =====
-    SampleSize = 1000,
+    SampleSize = 500,
     // Rows to sample per column for type detection
+    // Could make sense for SampleSize to be some percentage of total rows? - 2025-11-05-134411
     Tolerance = 0.01,
     // Allow 1% non-conforming values (handles dirty data)
     // ===== DATA LOADING =====
     Source = Csv.Document(
-        Web.Contents("https://fulcrumapp.io/share/c594f38a9fbfe92e8ef3/csv"),
+        Web.Contents("https://fulcrumapp.io/share/aab9db8f4ed411a41ebb/csv"),
         [
             Delimiter = ",",
             Encoding = 65001,
@@ -71,6 +72,12 @@ let
         )
     ),
     // ===== APPLY TYPES =====
-    #"Changed Type" = Table.TransformColumnTypes(#"Cleaned Data", TypePairs, "en-US")
+    #"Changed Type" = Table.TransformColumnTypes(#"Cleaned Data", TypePairs, "en-US"),
+    #"Added _created_duration_minutes" = Table.AddColumn(
+        #"Changed Type", "_created_duration_minutes", each [_created_duration] / 60
+    ),
+    #"Changed Type1" = Table.TransformColumnTypes(
+        #"Added _created_duration_minutes", {{"_created_duration_minutes", type duration}}
+    )
 in
-    #"Changed Type"
+    #"Changed Type1"
